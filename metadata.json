@@ -1,0 +1,6 @@
+{
+  "name": "Studus Pós UNIFIP - Administração",
+  "description": "Painel de controle acadêmico para gerenciamento de turmas, inclusão de alunos, disciplinas, diário de presença e notas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -53,7 +53,7 @@ export default function Header({
         {/* Floating Greeting cards, avatar and notifications */}
         <div className="flex items-center space-x-4 self-end md:self-auto relative" id="student-actions-area">
           <span className="text-gray-700 font-medium text-[15px]" id="student-welcome-text">
-            {student.name}, Bem-vindo!
+            Bem-vindo!
           </span>
 
           {/* Student initials avatar */}

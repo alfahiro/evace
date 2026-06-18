@@ -7,7 +7,59 @@ export const initialTurmas: Turma[] = [
     title: 'Especialização em Urgência, Emergência e UTI',
     number: 'T01',
     code: 'MCR-UTI-2025',
-    category: 'UTI'
+    category: 'UTI',
+    folders: [
+      {
+        id: 'fld_seeded_manuais',
+        name: '📁 Manuais e Diretrizes',
+        type: 'folder',
+        updatedAt: '12/06/2026'
+      },
+      {
+        id: 'file_seeded_syllabus',
+        name: '📄 Projeto_Pedagogico_Curso.pdf',
+        type: 'file',
+        size: '1.8 MB',
+        parentId: 'fld_seeded_manuais',
+        updatedAt: '12/06/2026'
+      },
+      {
+        id: 'file_seeded_calendar',
+        name: '📅 Calendario_Academico_2026.pdf',
+        type: 'file',
+        size: '850 KB',
+        parentId: 'fld_seeded_manuais',
+        updatedAt: '12/06/2026'
+      },
+      {
+        id: 'fld_seeded_avaliacoes',
+        name: '📁 Avaliações e Provas',
+        type: 'folder',
+        updatedAt: '15/06/2026'
+      },
+      {
+        id: 'file_seeded_prova1',
+        name: '📄 Prova_Pratica_Simulada_UTI_PacienteCritico.pdf',
+        type: 'file',
+        size: '1.1 MB',
+        parentId: 'fld_seeded_avaliacoes',
+        updatedAt: '15/06/2026'
+      },
+      {
+        id: 'fld_seeded_matriculas',
+        name: '📁 Documentos de Matrícula (Alunos)',
+        type: 'folder',
+        updatedAt: '10/06/2026'
+      },
+      {
+        id: 'file_seeded_documentacao',
+        name: '📄 Regimento_Interno_FIP_Online.pdf',
+        type: 'file',
+        size: '540 KB',
+        parentId: 'fld_seeded_matriculas',
+        updatedAt: '10/06/2026'
+      }
+    ]
   }
 ];
 

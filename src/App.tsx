@@ -209,16 +209,68 @@ export default function App() {
   
   // 1. Class (Turma) Handlers
   const handleAddTurma = (newTurma: Omit<Turma, 'id'>) => {
+    // Generate automatic folder structure for organizing documents as requested
+    const nowStr = new Date().toLocaleDateString('pt-BR');
+    const docFolderId = `fld_docs_${Date.now()}`;
+    const assessmentFolderId = `fld_assess_${Date.now()}`;
+    const enrollmentFolderId = `fld_enroll_${Date.now()}`;
+
+    const defaultFolders = [
+      {
+        id: docFolderId,
+        name: '📁 Manuais e Diretrizes',
+        type: 'folder' as const,
+        updatedAt: nowStr
+      },
+      {
+        id: `file_syllabus_${Date.now()}`,
+        name: '📄 Projeto_Pedagogico_Curso.pdf',
+        type: 'file' as const,
+        size: '1.8 MB',
+        parentId: docFolderId,
+        updatedAt: nowStr
+      },
+      {
+        id: `file_cal_${Date.now()}`,
+        name: '📅 Calendario_Academico_2026.pdf',
+        type: 'file' as const,
+        size: '850 KB',
+        parentId: docFolderId,
+        updatedAt: nowStr
+      },
+      {
+        id: assessmentFolderId,
+        name: '📁 Avaliações e Provas',
+        type: 'folder' as const,
+        updatedAt: nowStr
+      },
+      {
+        id: enrollmentFolderId,
+        name: '📁 Documentos de Matrícula (Alunos)',
+        type: 'folder' as const,
+        updatedAt: nowStr
+      },
+      {
+        id: `file_term_${Date.now()}`,
+        name: '📄 Termo_de_Adesao_FIP_Online.pdf',
+        type: 'file' as const,
+        size: '420 KB',
+        parentId: enrollmentFolderId,
+        updatedAt: nowStr
+      }
+    ];
+
     const fresh: Turma = {
       ...newTurma,
-      id: `t_${Date.now()}`
+      id: `t_${Date.now()}`,
+      folders: defaultFolders
     };
     setTurmas(prev => [...prev, fresh]);
 
     // Push system alert notification
     const newNotif: Notification = {
       id: `n_t_${Date.now()}`,
-      message: `Nova Turma Registrada: "${fresh.title}" pelo administrador.`,
+      message: `Nova Turma Registrada: "${fresh.title}" pelo administrador (Pasta de Documentos gerada).`,
       date: 'Agora mesmo',
       read: false,
       type: 'general'
@@ -230,6 +282,10 @@ export default function App() {
     setTurmas(prev => prev.filter(t => t.id !== id));
     // Cascade removal for students enrollment linkage and modules setup
     setStudents(prev => prev.map(s => s.turmaId === id ? { ...s, turmaId: '' } : s));
+  };
+
+  const handleUpdateTurma = (updatedTurma: Turma) => {
+    setTurmas(prev => prev.map(t => t.id === updatedTurma.id ? updatedTurma : t));
   };
 
   // 2. Student (Aluno) Handlers
@@ -495,6 +551,7 @@ export default function App() {
                 onAddStudent={handleAddStudent}
                 onAddModule={handleAddModule}
                 onDeleteModule={handleDeleteModule}
+                onUpdateTurma={handleUpdateTurma}
               />
             )}
 

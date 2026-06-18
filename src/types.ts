@@ -18,12 +18,22 @@ export interface Module {
   status: 'concluido' | 'em_andamento' | 'agendado';
 }
 
+export interface FolderItem {
+  id: string;
+  name: string;
+  type: 'file' | 'folder';
+  size?: string;
+  updatedAt: string;
+  parentId?: string;
+}
+
 export interface Turma {
   id: string;
   title: string;
   number: string;
   code: string;
   category: 'UTI' | 'Urgência' | 'Dermatologia' | 'Geral';
+  folders?: FolderItem[];
 }
 
 export interface AttendanceRecord {

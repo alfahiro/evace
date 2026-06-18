@@ -146,7 +146,9 @@ export default function App() {
     });
 
     setStudents(prev => {
-      const merged = [...prev];
+      // Filter out any cached pre-seeded students
+      const cleaned = prev.filter(s => s.id !== 's_mauro_jorge' && s.id !== 's_rute_maria');
+      const merged = [...cleaned];
       initialStudents.forEach(s => {
         if (!merged.some(item => item.id === s.id)) {
           merged.push(s);
@@ -156,7 +158,9 @@ export default function App() {
     });
 
     setModules(prev => {
-      const merged = [...prev];
+      // Filter out any cached pre-seeded disciplines
+      const cleaned = prev.filter(m => !m.id.startsWith('m_urg_'));
+      const merged = [...cleaned];
       initialModules.forEach(m => {
         if (!merged.some(item => item.id === m.id)) {
           merged.push(m);
@@ -166,9 +170,10 @@ export default function App() {
     });
 
     setAttendanceRecords(prev => {
-      const merged = [...prev];
+      // Filter out pre-seeded attendance
+      const cleaned = prev.filter(a => !a.id.startsWith('att_seeded_'));
+      const merged = [...cleaned];
       initialAttendanceRecords.forEach(a => {
-        // Find existing attendance by id and replace, or push
         const flag = merged.findIndex(item => item.id === a.id);
         if (flag > -1) {
           merged[flag] = a;
@@ -180,7 +185,9 @@ export default function App() {
     });
 
     setGradeRecords(prev => {
-      const merged = [...prev];
+      // Filter out pre-seeded grades
+      const cleaned = prev.filter(g => !g.id.startsWith('grade_seeded_'));
+      const merged = [...cleaned];
       initialGradeRecords.forEach(g => {
         const flag = merged.findIndex(item => item.id === g.id);
         if (flag > -1) {

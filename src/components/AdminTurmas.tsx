@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusCircle, GraduationCap, Users, BookOpen, Trash2, Calendar, FilePlus, ChevronDown, ChevronUp, AlertCircle, Sparkles } from 'lucide-react';
+import { PlusCircle, GraduationCap, Users, BookOpen, Trash2, Calendar, FilePlus, ChevronDown, ChevronUp, AlertCircle, Sparkles, X } from 'lucide-react';
 import { Turma, Student, Module } from '../types';
 
 interface AdminTurmasProps {
@@ -46,6 +46,14 @@ export default function AdminTurmas({
   // Custom confirmation state for deletions
   const [confirmDeleteTurmaId, setConfirmDeleteTurmaId] = useState<string | null>(null);
   const [confirmDeleteModuleId, setConfirmDeleteModuleId] = useState<string | null>(null);
+
+  // Modal dataset for beautiful floating popover detail sheets
+  const [modalData, setModalData] = useState<{
+    type: 'students' | 'modules';
+    turmaTitle: string;
+    turmaId: string;
+    items: any[];
+  } | null>(null);
 
   const handleSubmitTurma = (e: React.FormEvent) => {
     e.preventDefault();
@@ -277,15 +285,42 @@ export default function AdminTurmas({
                   </div>
 
                   <div className="flex items-center space-x-6 self-stretch justify-between sm:self-auto sm:justify-end">
-                    <div className="flex items-center space-x-4 text-xs font-semibold text-slate-600">
-                      <span className="flex items-center" title="Alunos inscritos">
-                        <Users className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                        {classStudents.length}
-                      </span>
-                      <span className="flex items-center" title="Disciplines na grade">
-                        <BookOpen className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                        {classModules.length}
-                      </span>
+                    <div className="flex items-center space-x-3 text-xs font-semibold text-slate-600">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setModalData({
+                            type: 'students',
+                            turmaTitle: turma.title,
+                            turmaId: turma.id,
+                            items: classStudents
+                          });
+                        }}
+                        className="flex items-center space-x-1 px-1.5 py-0.5 rounded-md hover:bg-slate-100 transition-all cursor-pointer group active:scale-95"
+                        title="Ver alunos matriculados"
+                      >
+                        <Users className="w-3 h-3 text-slate-400 group-hover:text-emerald-700 transition-colors" />
+                        <span className="text-[11px] font-bold text-slate-600 group-hover:text-slate-800">{classStudents.length}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setModalData({
+                            type: 'modules',
+                            turmaTitle: turma.title,
+                            turmaId: turma.id,
+                            items: classModules
+                          });
+                        }}
+                        className="flex items-center space-x-1 px-1.5 py-0.5 rounded-md hover:bg-slate-100 transition-all cursor-pointer group active:scale-95"
+                        title="Ver disciplinas curriculares"
+                      >
+                        <BookOpen className="w-3 h-3 text-slate-400 group-hover:text-emerald-700 transition-colors" />
+                        <span className="text-[11px] font-bold text-slate-600 group-hover:text-slate-800">{classModules.length}</span>
+                      </button>
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -548,6 +583,95 @@ export default function AdminTurmas({
           })
         )}
       </div>
+
+      {/* Floating Info Modal Window */}
+      {modalData && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
+            {/* Header */}
+            <div className="bg-slate-50 px-5 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+              <div>
+                <span className="text-[9px] font-extrabold uppercase bg-emerald-50 text-[#0a4d2c] px-2 py-0.5 rounded">
+                  {modalData.type === 'students' ? 'Estudantes Matriculados' : 'Grade de Disciplinas'}
+                </span>
+                <h3 className="text-sm font-extrabold text-slate-800 mt-1 leading-tight">
+                  {modalData.turmaTitle}
+                </h3>
+              </div>
+              <button
+                onClick={() => setModalData(null)}
+                className="p-1.5 hover:bg-slate-200/60 rounded-full text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Content list */}
+            <div className="p-5 overflow-y-auto space-y-3 flex-1 min-h-0">
+              {modalData.items.length === 0 ? (
+                <div className="py-8 text-center text-slate-400 text-xs">
+                  Nenhum registro cadastrado nesta turma.
+                </div>
+              ) : modalData.type === 'students' ? (
+                modalData.items.map((student: any) => (
+                  <div 
+                    key={student.id} 
+                    className="flex justify-between items-center text-xs p-3 hover:bg-slate-50 rounded-xl border border-slate-100/80 shadow-2xs"
+                  >
+                    <div>
+                      <span className="font-extrabold text-slate-800 block text-xs">{student.name}</span>
+                      <span className="text-[10px] font-mono text-slate-400 mt-0.5 block">
+                        Matrícula: {student.enrollmentId}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block font-semibold mt-0.5">
+                        {student.email}
+                      </span>
+                    </div>
+                    <span className="text-[9px] bg-emerald-55 text-emerald-800 px-2 py-0.5 rounded font-extrabold uppercase shrink-0">
+                      Inscrito
+                    </span>
+                  </div>
+                ))
+              ) : (
+                modalData.items.map((mod: any) => (
+                  <div 
+                    key={mod.id} 
+                    className="flex justify-between items-center text-xs p-3 hover:bg-slate-50 rounded-xl border border-slate-100/80 shadow-2xs"
+                  >
+                    <div>
+                      <span className="font-extrabold text-slate-800 block text-xs">{mod.title}</span>
+                      <span className="text-[10px] font-medium text-slate-500 mt-0.5 block">
+                        Prof: <span className="font-semibold text-slate-700">{mod.professor}</span>
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-400 block mt-0.5">
+                        Carga Horária: {mod.workload}h
+                      </span>
+                    </div>
+                    <span className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded uppercase shrink-0 ${
+                      mod.status === 'concluido' ? 'bg-emerald-50 text-emerald-700' :
+                      mod.status === 'em_andamento' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {mod.status === 'concluido' ? 'Concluído' :
+                       mod.status === 'em_andamento' ? 'Ativo' : 'Agendado'}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="bg-slate-50 px-5 py-3.5 border-t border-slate-100 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setModalData(null)}
+                className="px-4 py-2 bg-[#0a4d2c] hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow-xs transition-colors cursor-pointer"
+              >
+                Voltar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

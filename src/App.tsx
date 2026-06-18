@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
 import LoginView from './components/LoginView';
 
@@ -93,16 +92,11 @@ export default function App() {
   });
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
 
-  // Force sidebar open on desktop screens
+  // Initialize sidebar state on mount once based on screen size, no persistent resize force
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsSidebarOpen(true);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
   }, []);
 
   // Synchronize dynamic states with localStorage to support solid persistence
@@ -424,20 +418,68 @@ export default function App() {
 
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-6 pb-20 pt-2 relative">
           
-          <Sidebar 
-            currentTab={currentTab as any} 
-            onChangeTab={(tab) => {
-              setCurrentTab(tab as any);
-              if (window.innerWidth < 1024) {
-                setIsSidebarOpen(false);
-              }
-            }} 
-            isOpen={isSidebarOpen}
-            onToggle={setIsSidebarOpen}
-          />
+          {/* Persistent Horizontal Navigation Tab Bar */}
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl p-2.5 mb-6 border border-slate-200/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-emerald-50 rounded-lg shrink-0 self-start md:self-auto">
+              <span className="text-[10px] uppercase font-extrabold tracking-wider text-[#0a4d2c] flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                Secretaria Acadêmica
+              </span>
+            </div>
+            
+            <div className="flex flex-wrap gap-1.5 md:justify-end w-full md:w-auto">
+              <button
+                onClick={() => setCurrentTab('turmas')}
+                className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex-1 sm:flex-initial ${
+                  currentTab === 'turmas'
+                    ? 'bg-[#0a4d2c] text-white shadow-md shadow-emerald-950/20 scale-[1.02]'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-[#0b4e2d] active:scale-95'
+                }`}
+              >
+                <GraduationCap className="w-4 h-4 mr-2" />
+                <span>Gerenciar Turmas</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentTab('alunos')}
+                className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex-1 sm:flex-initial ${
+                  currentTab === 'alunos'
+                    ? 'bg-[#0a4d2c] text-white shadow-md shadow-emerald-950/20 scale-[1.02]'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-[#0b4e2d] active:scale-95'
+                }`}
+              >
+                <Users className="w-4 h-4 mr-2" />
+                <span>Inclusão de Alunos</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentTab('presenca')}
+                className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex-1 sm:flex-initial ${
+                  currentTab === 'presenca'
+                    ? 'bg-[#0a4d2c] text-white shadow-md shadow-emerald-950/20 scale-[1.02]'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-[#0b4e2d] active:scale-95'
+                }`}
+              >
+                <CheckSquare className="w-4 h-4 mr-2" />
+                <span>Controle de Presença</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentTab('notas_disciplinas')}
+                className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex-1 sm:flex-initial ${
+                  currentTab === 'notas_disciplinas'
+                    ? 'bg-[#0a4d2c] text-white shadow-md shadow-emerald-950/20 scale-[1.02]'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-[#0b4e2d] active:scale-95'
+                }`}
+              >
+                <Award className="w-4 h-4 mr-2" />
+                <span>Controle de Disciplinas</span>
+              </button>
+            </div>
+          </div>
 
           <div 
-            className={`transition-all duration-300 ${isSidebarOpen ? 'lg:pl-[272px]' : 'pl-0'}`}
+            className="transition-all duration-300 pl-0"
             id="tab-view-viewport"
           >
             {/* CONDITIONAL RENDER ACCORDING TO TABS */}

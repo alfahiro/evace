@@ -62,7 +62,6 @@ export default function AdminTurmas({
   const [newFileName, setNewFileName] = useState('');
   const [newFileSize, setNewFileSize] = useState('');
   const [showNewFileInput, setShowNewFileInput] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
 
   // Quick enroll student states
   const [quickStudentName, setQuickStudentName] = useState('');
@@ -185,23 +184,6 @@ export default function AdminTurmas({
     setNewFileName('');
     setNewFileSize('');
     setShowNewFileInput(false);
-  };
-
-  const handleFileDropOrSelect = (file: File) => {
-    let name = file.name;
-    // Ensure name format is clean and prepends the sheet icon naturally if not there
-    if (!name.startsWith('📄 ') && !name.startsWith('📅 ') && !name.startsWith('📋 ')) {
-      name = '📄 ' + name;
-    }
-    
-    let formattedSize = '';
-    if (file.size > 1024 * 1024) {
-      formattedSize = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
-    } else {
-      formattedSize = `${(file.size / 1024).toFixed(0)} KB`;
-    }
-    setNewFileName(name);
-    setNewFileSize(formattedSize);
   };
 
   const handleDeleteFolderItem = (selectedTurma: Turma, itemId: string) => {
@@ -879,79 +861,29 @@ export default function AdminTurmas({
                     {showNewFileInput && (
                       <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 space-y-3 animate-in slide-in-from-top-1 duration-200">
                         <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Importar Documento Técnico / PDF</span>
-                        
-                        {/* Drag and Drop Zone Container */}
-                        <div 
-                          className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-all ${
-                            dragActive 
-                              ? 'border-emerald-500 bg-emerald-100/50 scale-[0.99]' 
-                              : 'border-emerald-300 hover:border-emerald-400 bg-white'
-                          }`}
-                          onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }}
-                          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }}
-                          onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); }}
-                          onDrop={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setDragActive(false);
-                            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                              handleFileDropOrSelect(e.dataTransfer.files[0]);
-                            }
-                          }}
-                        >
-                          <input
-                            type="file"
-                            id="pdf-upload-picker"
-                            accept=".pdf,application/pdf"
-                            className="hidden"
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                handleFileDropOrSelect(e.target.files[0]);
-                              }
-                            }}
-                          />
-                          <label 
-                            htmlFor="pdf-upload-picker" 
-                            className="cursor-pointer flex flex-col items-center justify-center space-y-2 text-xs"
-                          >
-                            <UploadCloud className="w-8 h-8 text-emerald-500 animate-pulse duration-1000" />
-                            <span className="font-extrabold text-[#0a4d2c]">Arraste e solte o arquivo PDF aqui</span>
-                            <span className="text-slate-400">ou clique para navegar nos seus arquivos</span>
-                          </label>
-                        </div>
-
-                        {/* Optional Filename & Size verification fields */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-500 block">Nome do documento:</label>
-                            <input
-                              type="text"
-                              placeholder="Selecione um arquivo ou digite..."
-                              value={newFileName}
-                              onChange={(e) => setNewFileName(e.target.value)}
-                              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-emerald-500 text-slate-800 font-medium"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-500 block">Tamanho do arquivo:</label>
-                            <input
-                              type="text"
-                              placeholder="Ex: 1.2 MB (Preenchido automaticamente)"
-                              value={newFileSize}
-                              onChange={(e) => setNewFileSize(e.target.value)}
-                              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-emerald-500 text-slate-800 font-medium"
-                            />
-                          </div>
+                          <input
+                            type="text"
+                            placeholder="Nome do Arquivo (Ex: Cronograma_Equipamentos.pdf)"
+                            value={newFileName}
+                            onChange={(e) => setNewFileName(e.target.value)}
+                            className="px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-emerald-500 text-slate-800"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Tamanho (Opcional, Ex: 1.5 MB)"
+                            value={newFileSize}
+                            onChange={(e) => setNewFileSize(e.target.value)}
+                            className="px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-emerald-500 text-slate-800"
+                          />
                         </div>
-
-                        {/* Dropdown Directory Selection and button trigger */}
-                        <div className="flex flex-col sm:flex-row gap-2 items-center pt-1">
+                        <div className="flex flex-col sm:flex-row gap-2 items-center">
                           <div className="w-full sm:flex-1 shrink-0 flex items-center">
-                            <span className="text-[10px] text-gray-500 font-bold mr-2 whitespace-nowrap">Pasta de Destino:</span>
+                            <span className="text-[10px] text-gray-500 font-bold mr-2 whitespace-nowrap">Local de Destino:</span>
                             <select
                               value={selectedParentId}
                               onChange={(e) => setSelectedParentId(e.target.value)}
-                              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white text-slate-800 font-medium"
+                              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white text-slate-800"
                             >
                               <option value="root">Raiz da Pasta (/)</option>
                               {(selectedTurma.folders || [])
@@ -967,10 +899,9 @@ export default function AdminTurmas({
                           <button
                             type="button"
                             onClick={() => handleCreateFile(selectedTurma)}
-                            disabled={!newFileName.trim()}
-                            className="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-bold rounded-xl cursor-pointer transition-all active:scale-95 whitespace-nowrap"
+                            className="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl cursor-pointer"
                           >
-                            Confirmar Importação
+                            Importar para a Pasta
                           </button>
                         </div>
                       </div>

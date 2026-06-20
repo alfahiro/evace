@@ -8,6 +8,7 @@ import AdminTurmas from './components/AdminTurmas';
 import AdminAlunos from './components/AdminAlunos';
 import AdminPresenca from './components/AdminPresenca';
 import AdminNotasDisciplinas from './components/AdminNotasDisciplinas';
+import AdminProfessores from './components/AdminProfessores';
 
 // Pre-seeded database elements
 import { 
@@ -21,7 +22,7 @@ import {
 } from './data';
 
 import { Student, Turma, Module, AttendanceRecord, GradeRecord, AgendaEvent, Notification } from './types';
-import { Award, CheckSquare, GraduationCap, Trash2, Users } from 'lucide-react';
+import { Award, CheckSquare, GraduationCap, Trash2, Users, Briefcase } from 'lucide-react';
 
 export default function App() {
   // Shared state databases with local storage persistence
@@ -82,7 +83,7 @@ export default function App() {
   });
   
   // App navigation state
-  const [currentTab, setCurrentTab] = useState<'turmas' | 'alunos' | 'presenca' | 'notas_disciplinas'>('turmas');
+  const [currentTab, setCurrentTab] = useState<'turmas' | 'alunos' | 'presenca' | 'notas_disciplinas' | 'professores'>('turmas');
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     try {
       return typeof window !== 'undefined' ? window.innerWidth >= 1024 : true;
@@ -453,22 +454,12 @@ export default function App() {
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-6 pb-20 pt-2 relative">
           
           {/* Persistent Horizontal Navigation Tab Bar */}
-          <div className="bg-white/90 backdrop-blur-md rounded-2xl p-2.5 mb-6 border border-slate-200/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div className="flex items-center justify-between md:justify-start w-full md:w-auto gap-3">
-              <div className="flex items-center space-x-2 px-3 py-1.5 bg-emerald-50 rounded-lg shrink-0">
-                <span className="text-[10px] uppercase font-extrabold tracking-wider text-[#0a4d2c] flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
-                  Secretaria Acadêmica
-                </span>
-              </div>
-              <button
-                onClick={handleClearAllData}
-                title="Excluir todas as turmas, alunos e disciplinas de uma única vez de forma definitiva"
-                className="flex items-center justify-center px-3 py-1.5 rounded-lg text-[10px] font-extrabold cursor-pointer transition-all duration-200 bg-rose-50 text-rose-700 hover:bg-rose-100 active:scale-95 border border-rose-200/40 shadow-xs"
-              >
-                <Trash2 className="w-3.5 h-3.5 mr-1" />
-                <span>Excluir Tudo</span>
-              </button>
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl p-1.5 mb-6 border border-slate-200/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-emerald-50 rounded-lg shrink-0 self-start md:self-auto">
+              <span className="text-[10px] uppercase font-extrabold tracking-wider text-[#0a4d2c] flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                Secretaria Acadêmica
+              </span>
             </div>
             
             <div className="flex flex-wrap gap-1.5 md:justify-end w-full md:w-auto">
@@ -506,6 +497,18 @@ export default function App() {
               >
                 <Award className="w-4 h-4 mr-2" />
                 <span>Controle de Disciplinas</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentTab('professores')}
+                className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex-1 sm:flex-initial ${
+                  currentTab === 'professores'
+                    ? 'bg-[#0a4d2c] text-white shadow-md shadow-emerald-950/20 scale-[1.02]'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-[#0b4e2d] active:scale-95'
+                }`}
+              >
+                <Briefcase className="w-4 h-4 mr-2" />
+                <span>Cadastro de Professores</span>
               </button>
             </div>
           </div>
@@ -563,6 +566,11 @@ export default function App() {
                 onUpdateModuleStatus={handleUpdateModuleStatus}
                 onSaveGrades={handleSaveGrades}
               />
+            )}
+
+            {/* TAB 5: CADASTRO DE PROFESSORES */}
+            {currentTab === 'professores' && (
+              <AdminProfessores />
             )}
 
 

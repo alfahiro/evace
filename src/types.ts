@@ -52,6 +52,36 @@ export interface GradeRecord {
   grade: number; // 0.0 to 10.0
 }
 
+export interface Professor {
+  id: string;
+  name: string;
+  cpf: string;
+  rg: string;
+  rgOrgao: string;
+  rgEmissao: string;
+  naturalidade: string;
+  dataNasc: string;
+  nomeMae: string;
+  nomePai: string;
+  graduacao: string;
+  posGraduacao: string;
+  titulacao: 'Doutor' | 'Mestre' | 'Especialista';
+  endereco: string;
+  numero: string;
+  bairro: string;
+  cep: string;
+  cidade: string;
+  estado: string;
+  telFixo?: string;
+  telCel: string;
+  telCel2?: string;
+  email: string;
+  chavePix: string;
+  banco: string;
+  agencia: string;
+  conta: string;
+}
+
 export interface AgendaEvent {
   id: string;
   title: string;

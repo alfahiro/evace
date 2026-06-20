@@ -21,7 +21,7 @@ import {
 } from './data';
 
 import { Student, Turma, Module, AttendanceRecord, GradeRecord, AgendaEvent, Notification } from './types';
-import { Award, CheckSquare, GraduationCap, Users } from 'lucide-react';
+import { Award, CheckSquare, GraduationCap, Trash2, Users } from 'lucide-react';
 
 export default function App() {
   // Shared state databases with local storage persistence
@@ -124,7 +124,7 @@ export default function App() {
     localStorage.setItem('evace_events', JSON.stringify(events));
   }, [events]);
 
-  // Load a fast-login context on start (Auto-sign in as coordinator for premium ease-of-use)
+  // Load a fast-login context on start and ensure a completely clean slate database-wise
   useEffect(() => {
     setStudent({
       id: 'admin-001',
@@ -134,74 +134,45 @@ export default function App() {
       turmaId: 't3'
     });
 
-    // Automatically inject/merge student and class from form if missing from state
-    setTurmas(prev => {
-      const merged = [...prev];
-      initialTurmas.forEach(t => {
-        if (!merged.some(item => item.id === t.id)) {
-          merged.push(t);
-        }
-      });
-      return merged;
-    });
-
-    setStudents(prev => {
-      // Filter out any cached pre-seeded students
-      const cleaned = prev.filter(s => s.id !== 's_mauro_jorge' && s.id !== 's_rute_maria');
-      const merged = [...cleaned];
-      initialStudents.forEach(s => {
-        if (!merged.some(item => item.id === s.id)) {
-          merged.push(s);
-        }
-      });
-      return merged;
-    });
-
-    setModules(prev => {
-      // Filter out any cached pre-seeded disciplines
-      const cleaned = prev.filter(m => !m.id.startsWith('m_urg_'));
-      const merged = [...cleaned];
-      initialModules.forEach(m => {
-        if (!merged.some(item => item.id === m.id)) {
-          merged.push(m);
-        }
-      });
-      return merged;
-    });
-
-    setAttendanceRecords(prev => {
-      // Filter out pre-seeded attendance
-      const cleaned = prev.filter(a => !a.id.startsWith('att_seeded_'));
-      const merged = [...cleaned];
-      initialAttendanceRecords.forEach(a => {
-        const flag = merged.findIndex(item => item.id === a.id);
-        if (flag > -1) {
-          merged[flag] = a;
-        } else {
-          merged.push(a);
-        }
-      });
-      return merged;
-    });
-
-    setGradeRecords(prev => {
-      // Filter out pre-seeded grades
-      const cleaned = prev.filter(g => !g.id.startsWith('grade_seeded_'));
-      const merged = [...cleaned];
-      initialGradeRecords.forEach(g => {
-        const flag = merged.findIndex(item => item.id === g.id);
-        if (flag > -1) {
-          merged[flag] = g;
-        } else {
-          merged.push(g);
-        }
-      });
-      return merged;
-    });
+    // One-time clean wipe of all records as requested by the user
+    const hasBeenWiped = localStorage.getItem('evace_wipe_all_data_2026_v2');
+    if (!hasBeenWiped) {
+      setTurmas([]);
+      setStudents([]);
+      setModules([]);
+      setAttendanceRecords([]);
+      setGradeRecords([]);
+      setEvents([]);
+      localStorage.setItem('evace_turmas', JSON.stringify([]));
+      localStorage.setItem('evace_students', JSON.stringify([]));
+      localStorage.setItem('evace_modules', JSON.stringify([]));
+      localStorage.setItem('evace_attendance', JSON.stringify([]));
+      localStorage.setItem('evace_grades', JSON.stringify([]));
+      localStorage.setItem('evace_events', JSON.stringify([]));
+      localStorage.setItem('evace_wipe_all_data_2026_v2', 'true');
+    }
   }, []);
 
   const handleLogout = () => {
     setStudent(null);
+  };
+
+  const handleClearAllData = () => {
+    if (window.confirm("Atenção: Você deseja excluir todas as turmas, todos os alunos e todas as disciplinas de forma permanente? Esta ação apagará todo o histórico e não poderá ser desfeita.")) {
+      setTurmas([]);
+      setStudents([]);
+      setModules([]);
+      setAttendanceRecords([]);
+      setGradeRecords([]);
+      setEvents([]);
+      localStorage.setItem('evace_turmas', JSON.stringify([]));
+      localStorage.setItem('evace_students', JSON.stringify([]));
+      localStorage.setItem('evace_modules', JSON.stringify([]));
+      localStorage.setItem('evace_attendance', JSON.stringify([]));
+      localStorage.setItem('evace_grades', JSON.stringify([]));
+      localStorage.setItem('evace_events', JSON.stringify([]));
+      alert("Sucesso: Todas as turmas, alunos e disciplinas foram excluídos com sucesso!");
+    }
   };
 
   const handleMarkAsRead = (id: string) => {
@@ -483,11 +454,21 @@ export default function App() {
           
           {/* Persistent Horizontal Navigation Tab Bar */}
           <div className="bg-white/90 backdrop-blur-md rounded-2xl p-2.5 mb-6 border border-slate-200/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div className="flex items-center space-x-2 px-3 py-1.5 bg-emerald-50 rounded-lg shrink-0 self-start md:self-auto">
-              <span className="text-[10px] uppercase font-extrabold tracking-wider text-[#0a4d2c] flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
-                Secretaria Acadêmica
-              </span>
+            <div className="flex items-center justify-between md:justify-start w-full md:w-auto gap-3">
+              <div className="flex items-center space-x-2 px-3 py-1.5 bg-emerald-50 rounded-lg shrink-0">
+                <span className="text-[10px] uppercase font-extrabold tracking-wider text-[#0a4d2c] flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                  Secretaria Acadêmica
+                </span>
+              </div>
+              <button
+                onClick={handleClearAllData}
+                title="Excluir todas as turmas, alunos e disciplinas de uma única vez de forma definitiva"
+                className="flex items-center justify-center px-3 py-1.5 rounded-lg text-[10px] font-extrabold cursor-pointer transition-all duration-200 bg-rose-50 text-rose-700 hover:bg-rose-100 active:scale-95 border border-rose-200/40 shadow-xs"
+              >
+                <Trash2 className="w-3.5 h-3.5 mr-1" />
+                <span>Excluir Tudo</span>
+              </button>
             </div>
             
             <div className="flex flex-wrap gap-1.5 md:justify-end w-full md:w-auto">
@@ -501,18 +482,6 @@ export default function App() {
               >
                 <GraduationCap className="w-4 h-4 mr-2" />
                 <span>Gerenciar Turmas</span>
-              </button>
-
-              <button
-                onClick={() => setCurrentTab('alunos')}
-                className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex-1 sm:flex-initial ${
-                  currentTab === 'alunos'
-                    ? 'bg-[#0a4d2c] text-white shadow-md shadow-emerald-950/20 scale-[1.02]'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-[#0b4e2d] active:scale-95'
-                }`}
-              >
-                <Users className="w-4 h-4 mr-2" />
-                <span>Inclusão de Alunos</span>
               </button>
 
               <button

@@ -229,91 +229,7 @@ export default function DiarioOficialModal({
   };
 
   const handlePrintOnlyDiv = () => {
-    const printElement = document.getElementById('printable-journal-sheet');
-    if (!printElement) return;
-
-    // Create a sandboxed iframe to handle isolated document-only printing
-    const iframe = document.createElement('iframe');
-    iframe.name = 'print_iframe';
-    iframe.style.position = 'absolute';
-    iframe.style.width = '0px';
-    iframe.style.height = '0px';
-    iframe.style.border = '0px';
-    iframe.style.top = '-1000px';
-    iframe.style.left = '-1000px';
-    
-    document.body.appendChild(iframe);
-
-    const doc = iframe.contentWindow?.document;
-    if (!doc) return;
-
-    // Get styling sheets so the layout matches correctly
-    let styleText = '';
-    const styleElements = document.querySelectorAll('style, link[rel="stylesheet"]');
-    styleElements.forEach((el) => {
-      styleText += el.outerHTML;
-    });
-
-    doc.open();
-    doc.write(`
-      <html>
-        <head>
-          <title>Diário Oficial - ${curso}</title>
-          ${styleText}
-          <style>
-            @media print {
-              @page {
-                size: A4;
-                margin: 10mm;
-              }
-              body {
-                margin: 0 !important;
-                padding: 0 !important;
-                background-color: #ffffff !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-              }
-              .no-print {
-                display: none !important;
-              }
-              #printable-journal-sheet {
-                width: 100% !important;
-                max-width: 100% !important;
-                min-height: auto !important;
-                box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-              }
-            }
-            body {
-              background-color: #ffffff !important;
-              font-family: "Calibri", "Candara", "Segoe UI", Arial, sans-serif;
-            }
-            .no-print {
-              display: none !important;
-            }
-          </style>
-        </head>
-        <body style="margin: 0; padding: 0;">
-          <div id="printable-journal-sheet" class="print-area bg-white text-black p-10 w-full max-w-[210mm] min-h-[297mm] flex flex-col justify-between whitespace-normal" style="font-family: 'Calibri', 'Candara', 'Segoe UI', Arial, sans-serif; font-size: 12px; border: none; box-shadow: none; padding: 38px;">
-            ${printElement.innerHTML}
-          </div>
-          <script>
-            window.onload = function() {
-              setTimeout(function() {
-                window.focus();
-                window.print();
-                setTimeout(function() {
-                  window.parent.document.body.removeChild(window.frameElement);
-                }, 500);
-              }, 300);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    doc.close();
+    window.print();
   };
 
   const handleDownloadExcel = () => {
@@ -384,68 +300,40 @@ export default function DiarioOficialModal({
       {/* Dynamic Print CSS to hide everything except the print-area layout */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body {
-            background: white !important;
-            color: black !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            font-family: Arial, sans-serif !important;
+          @page {
+            size: A4 portrait;
+            margin: 10mm;
           }
-          /* Hide non-print structures but keep parent node trees active inside DOM */
-          .no-print, header, footer, aside, button, nav, #sidebar, #header-bar, #evace-primary-footer {
+          /* Hide all outer page contents */
+          body * {
+            visibility: hidden !important;
+          }
+          /* Clean layout and hide buttons, sidebar, panels and customizer widgets */
+          .no-print, .no-print *, header, footer, aside, button, nav, #header-bar, #evace-primary-footer {
             display: none !important;
             visibility: hidden !important;
           }
-          #evace-portal-layout, main, #tab-view-viewport, #grades-workspace {
-            display: block !important;
-            position: static !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: transparent !important;
-            box-shadow: none !important;
-            border: none !important;
-            height: auto !important;
-            overflow: visible !important;
-          }
-          /* Hide outer content default */
-          body * {
-            visibility: hidden;
-          }
-          /* Make sure the modal wrapper and printable sheet content are fully visible */
-          #diario-pdf-modal, #diario-pdf-modal * {
+          /* Isolate and render only the official journal sheet document */
+          #printable-journal-sheet, #printable-journal-sheet * {
             visibility: visible !important;
           }
-          /* Force physical full-screen overlay fit */
-          #diario-pdf-modal {
+          #printable-journal-sheet {
             position: absolute !important;
             left: 0 !important;
             top: 0 !important;
             width: 100% !important;
-            height: auto !important;
-            background: white !important;
-            display: block !important;
+            max-width: 100% !important;
+            min-height: auto !important;
             padding: 0 !important;
             margin: 0 !important;
-            overflow: visible !important;
-            z-index: 999999 !important;
-          }
-          /* Format print-area layout specifically for standard A4 printing */
-          .print-area {
-            position: relative !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 210mm !important;
-            max-width: 100% !important;
-            background: white !important;
-            box-shadow: none !important;
             border: none !important;
-            padding: 10mm !important;
-            margin: 0 auto !important;
-            display: block !important;
-            page-break-inside: avoid !important;
+            box-shadow: none !important;
+            background: white !important;
+            color: black !important;
           }
-          .custom-page-break {
-            page-break-after: always;
+          table, th, td, tr {
+            border-color: black !important;
+            color: black !important;
           }
         }
       `}} />

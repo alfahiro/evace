@@ -45,9 +45,25 @@ export default function Header({
       <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0" id="secondary-greeting-bar">
         {/* Breadcrumb or sub-title */}
         <div className="flex items-center space-x-2 text-xs text-emerald-900/60 font-semibold uppercase tracking-wider">
-          <span>Portal do Aluno</span>
-          <span>•</span>
-          <span>Cursos Ativos</span>
+          {student.role === 'admin' ? (
+            <>
+              <span>Portal de Coordenação</span>
+              <span>•</span>
+              <span>Gestão Completa (ADM)</span>
+            </>
+          ) : student.role === 'professor' ? (
+            <>
+              <span>Portal Docente</span>
+              <span>•</span>
+              <span>Diários de Aula</span>
+            </>
+          ) : (
+            <>
+              <span>Portal Discente</span>
+              <span>•</span>
+              <span>Atividades e Boletim</span>
+            </>
+          )}
         </div>
 
         {/* Floating Greeting cards, avatar and notifications */}

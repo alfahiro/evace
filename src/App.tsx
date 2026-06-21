@@ -9,6 +9,8 @@ import AdminAlunos from './components/AdminAlunos';
 import AdminPresenca from './components/AdminPresenca';
 import AdminNotasDisciplinas from './components/AdminNotasDisciplinas';
 import AdminProfessores from './components/AdminProfessores';
+import AdminUsuarios from './components/AdminUsuarios';
+import StudentPortalView from './components/StudentPortalView';
 
 // Pre-seeded database elements
 import { 
@@ -22,7 +24,7 @@ import {
 } from './data';
 
 import { Student, Turma, Module, AttendanceRecord, GradeRecord, AgendaEvent, Notification } from './types';
-import { Award, CheckSquare, GraduationCap, Trash2, Users, Briefcase } from 'lucide-react';
+import { Award, CheckSquare, GraduationCap, Trash2, Users, Briefcase, Key } from 'lucide-react';
 
 export default function App() {
   // Shared state databases with local storage persistence
@@ -83,7 +85,7 @@ export default function App() {
   });
   
   // App navigation state
-  const [currentTab, setCurrentTab] = useState<'turmas' | 'alunos' | 'presenca' | 'notas_disciplinas' | 'professores'>('turmas');
+  const [currentTab, setCurrentTab] = useState<'turmas' | 'alunos' | 'presenca' | 'notas_disciplinas' | 'professores' | 'usuarios'>('turmas');
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     try {
       return typeof window !== 'undefined' ? window.innerWidth >= 1024 : true;
@@ -125,17 +127,8 @@ export default function App() {
     localStorage.setItem('evace_events', JSON.stringify(events));
   }, [events]);
 
-  // Load a fast-login context on start and ensure a completely clean slate database-wise
+  // One-time clean wipe of all records as requested by the user
   useEffect(() => {
-    setStudent({
-      id: 'admin-001',
-      name: 'Rômulo Carriello (Coordenação)',
-      enrollmentId: 'EVA-COOR-1102',
-      email: 'romulo.carriello@evace.com.br',
-      turmaId: 't3'
-    });
-
-    // One-time clean wipe of all records as requested by the user
     const hasBeenWiped = localStorage.getItem('evace_wipe_all_data_2026_v2');
     if (!hasBeenWiped) {
       setTurmas([]);
@@ -414,7 +407,70 @@ export default function App() {
 
 
   if (!student) {
-    return <LoginView onLogin={(curr) => setStudent(curr)} />;
+    return (
+      <LoginView 
+        students={students}
+        turmas={turmas}
+        onLogin={(curr) => {
+          setStudent(curr);
+          if (curr.role === 'admin') {
+            setCurrentTab('turmas');
+          } else if (curr.role === 'professor') {
+            setCurrentTab('presenca');
+          }
+        }} 
+      />
+    );
+  }
+
+  if (student && student.role === 'aluno') {
+    return (
+      <div 
+        className="min-h-screen flex flex-col font-sans relative text-slate-800 bg-[#e8f1ec]"
+        id="evace-portal-layout"
+      >
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-50 overflow-hidden">
+          <svg 
+            className="w-full h-full min-h-screen" 
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 1440 900" 
+            preserveAspectRatio="none"
+          >
+            <polygon points="0,0 600,0 300,450" fill="#cee2d6" opacity="0.6" />
+            <polygon points="600,0 1440,0 1000,500" fill="#e1ede5" opacity="0.7" />
+            <polygon points="0,350 400,600 0,900" fill="#d8ebd2" opacity="0.5" />
+            <polygon points="400,600 1000,500 700,900" fill="#c7decb" opacity="0.8" />
+            <polygon points="1000,500 1440,300 1440,800" fill="#e6f0e9" opacity="0.6" />
+            <polygon points="700,900 1440,800 1440,900 1000,900" fill="#bcdcc2" opacity="0.7" />
+            <polygon points="300,450 1000,500 400,600" fill="#cfebd8" opacity="0.4" />
+          </svg>
+        </div>
+
+        <div className="relative z-10 flex flex-col flex-grow">
+          <Header 
+            student={student} 
+            onLogout={handleLogout}
+            notifications={notifications}
+            onMarkNotificationAsRead={handleMarkAsRead}
+            onClearNotifications={handleMarkAllAsRead}
+          />
+
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-6 pb-20 pt-2 relative">
+            <StudentPortalView 
+              student={student}
+              turmas={turmas}
+              modules={modules}
+              attendanceRecords={attendanceRecords}
+              gradeRecords={gradeRecords}
+              onLogout={handleLogout}
+            />
+          </main>
+          <div className="max-w-7xl w-full mx-auto px-4 md:px-6">
+            <Footer />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -463,17 +519,45 @@ export default function App() {
             </div>
             
             <div className="flex flex-wrap gap-1.5 md:justify-end w-full md:w-auto">
-              <button
-                onClick={() => setCurrentTab('turmas')}
-                className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex-1 sm:flex-initial ${
-                  currentTab === 'turmas'
-                    ? 'bg-[#0a4d2c] text-white shadow-md shadow-emerald-950/20 scale-[1.02]'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-[#0b4e2d] active:scale-95'
-                }`}
-              >
-                <GraduationCap className="w-4 h-4 mr-2" />
-                <span>Gerenciar Turmas</span>
-              </button>
+              {student.role === 'admin' && (
+                <>
+                  <button
+                    onClick={() => setCurrentTab('turmas')}
+                    className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex-1 sm:flex-initial ${
+                      currentTab === 'turmas'
+                        ? 'bg-[#0a4d2c] text-white shadow-md shadow-emerald-950/20 scale-[1.02]'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-[#0b4e2d] active:scale-95'
+                    }`}
+                  >
+                    <GraduationCap className="w-4 h-4 mr-2" />
+                    <span>Gerenciar Turmas</span>
+                  </button>
+
+                  <button
+                    onClick={() => setCurrentTab('alunos')}
+                    className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex-1 sm:flex-initial ${
+                      currentTab === 'alunos'
+                        ? 'bg-[#0a4d2c] text-white shadow-md shadow-emerald-950/20 scale-[1.02]'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-[#0b4e2d] active:scale-95'
+                    }`}
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    <span>Inclusão de Alunos</span>
+                  </button>
+
+                  <button
+                    onClick={() => setCurrentTab('usuarios')}
+                    className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex-1 sm:flex-initial ${
+                      currentTab === 'usuarios'
+                        ? 'bg-[#0a4d2c] text-white shadow-md shadow-emerald-950/20 scale-[1.02]'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-[#0b4e2d] active:scale-95'
+                    }`}
+                  >
+                    <Key className="w-4 h-4 mr-2" />
+                    <span>Controle de Acessos</span>
+                  </button>
+                </>
+              )}
 
               <button
                 onClick={() => setCurrentTab('presenca')}
@@ -571,6 +655,11 @@ export default function App() {
             {/* TAB 5: CADASTRO DE PROFESSORES */}
             {currentTab === 'professores' && (
               <AdminProfessores />
+            )}
+
+            {/* TAB 6: CONTROLE DE ACESSOS */}
+            {currentTab === 'usuarios' && (
+              <AdminUsuarios students={students} turmas={turmas} />
             )}
 
 

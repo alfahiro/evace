@@ -56,54 +56,77 @@ export default function AdminUsuarios({ students, turmas }: AdminUsuariosProps) 
       const savedAccounts = localStorage.getItem('evace_auth_users');
       let parsed: UserAccount[] = savedAccounts ? JSON.parse(savedAccounts) : [];
 
-      // Check if user "renan" exists; if not, seed him as admin
-      const hasRenan = parsed.some(u => u.username.toLowerCase() === 'renan');
-      if (!hasRenan) {
-        const seeded: UserAccount[] = [
-          {
-            id: 'seeded-renan-admin',
-            username: 'renan',
-            password: '88165169',
-            name: 'Renan Cabral',
-            role: 'admin',
-            email: 'renancabralbatista@gmail.com',
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'seeded-romulo-admin',
-            username: 'romulo',
-            password: 'admin123',
-            name: 'Rômulo Carriello',
-            role: 'admin',
-            email: 'romulo.carriello@evace.com.br',
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'seeded-patricia-prof',
-            username: 'patricia',
-            password: '123',
-            name: 'Prof.ª Patrícia Walker',
-            role: 'professor',
-            associatedId: 'prof-1',
-            email: 'patricia.walker@evace.com.br',
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'seeded-marcos-prof',
-            username: 'marcos',
-            password: '123',
-            name: 'Prof. Dr. Marcos Albuquerque',
-            role: 'professor',
-            associatedId: 'prof-2',
-            email: 'marcos.albuquerque@evace.com.br',
-            createdAt: new Date().toISOString()
+      const requiredAccounts: UserAccount[] = [
+        {
+          id: 'seeded-adm-admin',
+          username: 'adm',
+          password: '8112',
+          name: 'Administrador (ADM)',
+          role: 'admin',
+          email: 'adm@evace.com.br',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'seeded-renan-admin',
+          username: 'renan',
+          password: '88165169',
+          name: 'Renan Cabral',
+          role: 'admin',
+          email: 'renancabralbatista@gmail.com',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'seeded-romulo-admin',
+          username: 'romulo',
+          password: 'admin123',
+          name: 'Rômulo Carriello',
+          role: 'admin',
+          email: 'romulo.carriello@evace.com.br',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'seeded-patricia-prof',
+          username: 'patricia',
+          password: '123',
+          name: 'Prof.ª Patrícia Walker',
+          role: 'professor',
+          associatedId: 'prof-1',
+          email: 'patricia.walker@evace.com.br',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'seeded-marcos-prof',
+          username: 'marcos',
+          password: '123',
+          name: 'Prof. Dr. Marcos Albuquerque',
+          role: 'professor',
+          associatedId: 'prof-2',
+          email: 'marcos.albuquerque@evace.com.br',
+          createdAt: new Date().toISOString()
+        }
+      ];
+
+      let isModified = false;
+      requiredAccounts.forEach(reqAcc => {
+        const index = parsed.findIndex(u => u.username.toLowerCase() === reqAcc.username.toLowerCase());
+        if (index === -1) {
+          parsed.push(reqAcc);
+          isModified = true;
+        } else {
+          // If password changed or differs, enforce the requested ones
+          if (parsed[index].password !== reqAcc.password) {
+            parsed[index].password = reqAcc.password;
+            isModified = true;
           }
-        ];
-        
-        // Let's also seed accounts for the preseeded students to make evaluating simple and elegant!
-        students.forEach((s, idx) => {
-          const defaultUsername = s.name.toLowerCase().split(' ')[0] + (idx + 1);
-          seeded.push({
+        }
+      });
+
+      // Let's also seed accounts for the preseeded students to make evaluating simple and elegant!
+      students.forEach((s, idx) => {
+        const defaultUsername = s.name.toLowerCase().split(' ')[0] + (idx + 1);
+        const hasAccount = parsed.some(u => u.associatedId === s.id && u.role === 'aluno');
+        if (!hasAccount) {
+          parsed.push({
             id: `seeded-student-${s.id}`,
             username: defaultUsername,
             password: '123',
@@ -113,9 +136,11 @@ export default function AdminUsuarios({ students, turmas }: AdminUsuariosProps) 
             email: s.email,
             createdAt: new Date().toISOString()
           });
-        });
+          isModified = true;
+        }
+      });
 
-        parsed = [...seeded, ...parsed];
+      if (isModified || savedAccounts === null) {
         localStorage.setItem('evace_auth_users', JSON.stringify(parsed));
       }
       setUsers(parsed);
